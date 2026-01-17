@@ -46,6 +46,7 @@ Databases on free cloud tiers often get corrupted or deleted on reboot. This sys
 *   **⚡ Incremental Indexing:** Smart logic that adds *only* new files to the database in **<2 seconds**, avoiding slow full rebuilds.
 *   **📊 Real-Time Analytics:** Integrated **Redis (Upstash)** to track unique visitor counts securely.
 *   **💬 Multi-Lingual Support:** Automatically detects and responds in **Hindi (Devanagari)**, **Hinglish**, or **English** based on user input.
+*   **🚫 Hallucination Control:** Strict system prompts ensure the bot says "I don't know" instead of making up facts, ensuring **Information Integrity**.
 *   **🎨 Premium UI:** Glassmorphism design, animated gradients, and a custom login portal.
 
 ---
