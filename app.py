@@ -16,6 +16,9 @@ from presidio_analyzer import AnalyzerEngine
 from presidio_anonymizer import AnonymizerEngine
 from upstash_redis import Redis
 
+import warnings
+warnings.filterwarnings("ignore")
+
 # 1. Load Environment Variables
 load_dotenv()
 API_KEY = os.getenv("OPENROUTER_API_KEY")
