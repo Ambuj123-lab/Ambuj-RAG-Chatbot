@@ -44,7 +44,7 @@ wheels/
 # 🗄️ DATABASE & DATA FILES
 # ========================================
 chroma_db/
-data/
+# data/ (Uncommented to allow pushing PDFs)
 *.db
 *.sqlite3
 
