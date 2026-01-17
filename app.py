@@ -421,6 +421,10 @@ if user_input := st.chat_input("Ask a question..."):
         with st.spinner("Ambuj's AI is thinking... 🧠"):
             try:
                 embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+                if not os.path.exists("./chroma_db"):
+                    st.error("⚠️ Knowledge Base not found! Please upload PDFs in the sidebar.")
+                    st.stop()
+                    
                 vector_db = Chroma(persist_directory="./chroma_db", embedding_function=embeddings)
                 retriever = vector_db.as_retriever(search_kwargs={"k": 3})
                 relevant_docs = retriever.invoke(safe_input)
