@@ -65,6 +65,17 @@ Databases on free cloud tiers often get corrupted or deleted on reboot. This sys
 
 ---
 
+## ⚙️ Engineering Configurations
+
+*   **Chunking Strategy:** `RecursiveCharacterTextSplitter` with **1000 char size** and **200 char overlap**.
+    *   *Why:* Preserves semantic context by respecting sentence/paragraph boundaries.
+*   **Retrieval Pipeline:** **Top-k=3**.
+    *   *Why:* Retrieves the 3 most relevant context blocks, balancing information density with token efficiency.
+*   **Model Parameters:** **Temperature=0.3**.
+    *   *Why:* Prioritizes factual accuracy over creativity to prevent hallucinations.
+
+---
+
 ## 📂 Project Structure
 
 ```bash
