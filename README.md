@@ -1,6 +1,6 @@
 # 🦁 Ambuj's Secure RAG AI Assistant
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://ambuj-rag-bot.streamlit.app/)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://ambuj-rag-chatbot.streamlit.app/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![LangChain](https://img.shields.io/badge/🦜🔗-LangChain-green)](https://python.langchain.com/)
 [![Llama 3.3](https://img.shields.io/badge/🤖-Llama_3.3-purple)](https://ai.meta.com/llama/)
@@ -10,7 +10,7 @@
 > **"Not just a Chatbot, but a Secure, Self-Healing Enterprise AI Solution."**
 
 ## 🚀 Live Demo
-**[Click Here to Interact with the Bot](https://ambuj-rag-bot.streamlit.app/)**  
+**[Click Here to Interact with the Bot](https://ambuj-rag-chatbot.streamlit.app/)**  
 *(Login Required: Ask Admin for Access Key)*
 
 ---
