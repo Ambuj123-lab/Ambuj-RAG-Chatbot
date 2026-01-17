@@ -266,17 +266,41 @@ with st.sidebar:
     if st.button("🚀 Process & Index Data", type="primary"):
         with st.spinner("Ambuj's System is Indexing..."):
             try:
-                loader = DirectoryLoader("./data", glob="*.pdf", loader_cls=PyMuPDFLoader)
-                documents = loader.load()
-                if not documents: st.error("No PDFs found!"); st.stop()
-                
-                text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-                chunks = text_splitter.split_documents(documents)
                 embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+                text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
                 
-                if os.path.exists(os.path.join(os.getcwd(), 'chroma_db')): st.toast("⚠️ Updating Database...", icon="ℹ️")
-                vector_db = Chroma.from_documents(documents=chunks, embedding=embeddings, persist_directory=os.path.join(os.getcwd(), 'chroma_db'))
-                st.success(f"✅ Indexed {len(chunks)} chunks!")
+                # Check if DB exists
+                db_exists = os.path.exists(os.path.join(os.getcwd(), 'chroma_db'))
+                
+                if db_exists and uploaded_files:
+                    # INCREMENTAL UPDATE: Add only new files
+                    st.toast("⚡ Adding new documents to Knowledge Base...", icon="➕")
+                    vector_db = Chroma(persist_directory=os.path.join(os.getcwd(), 'chroma_db'), embedding_function=embeddings)
+                    
+                    new_chunks = []
+                    for uploaded_file in uploaded_files:
+                        # Load specific file
+                        loader = PyMuPDFLoader(os.path.join("data", uploaded_file.name))
+                        docs = loader.load()
+                        new_chunks.extend(text_splitter.split_documents(docs))
+                        
+                    if new_chunks:
+                        vector_db.add_documents(new_chunks)
+                        st.success(f"✅ Added {len(new_chunks)} new chunks to existing Brain!")
+                    else:
+                        st.warning("No content found in uploaded files.")
+                        
+                else:
+                    # FULL REBUILD (First time or Reset)
+                    st.toast("⚙️ Building Knowledge Base from scratch...", icon="🏗️")
+                    loader = DirectoryLoader("./data", glob="*.pdf", loader_cls=PyMuPDFLoader)
+                    documents = loader.load()
+                    if not documents: st.error("No PDFs found!"); st.stop()
+                    
+                    chunks = text_splitter.split_documents(documents)
+                    vector_db = Chroma.from_documents(documents=chunks, embedding=embeddings, persist_directory=os.path.join(os.getcwd(), 'chroma_db'))
+                    st.success(f"✅ Created new Brain with {len(chunks)} chunks!")
+                    
             except Exception as e: st.error(f"Error: {e}")
 
     st.divider()
