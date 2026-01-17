@@ -1,222 +1,130 @@
 ﻿import streamlit as st
 import os
 import re
-import pandas as pd
 from dotenv import load_dotenv
-
-# --- LIBRARIES ---
-from langchain_community.document_loaders import DirectoryLoader, PyMuPDFLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import PyMuPDFLoader, DirectoryLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from presidio_analyzer import AnalyzerEngine
 from presidio_anonymizer import AnonymizerEngine
 from upstash_redis import Redis
-
+import pandas as pd
 import warnings
+
+# --- CONFIGURATION ---
 warnings.filterwarnings("ignore")
-
-# 1. Load Environment Variables
 load_dotenv()
-API_KEY = os.getenv("OPENROUTER_API_KEY")
+
+st.set_page_config(
+    page_title="Ambuj's AI Assistant",
+    page_icon="🦁",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# --- SECRETS ---
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 APP_PASSWORD = os.getenv("APP_PASSWORD")  # Must be set in .env file
+API_KEY = OPENROUTER_API_KEY
 
-# Initialize session state for authentication
-if "authenticated" not in st.session_state:
-    st.session_state.authenticated = False 
-
-# 2. Page Configuration (Title & Icon)
-st.set_page_config(page_title="Ambuj Kumar Tripathi - AI Portfolio", page_icon="ðŸ¦", layout="wide")
-
-# --- ðŸŽ¨ SUPER PREMIUM CSS (Landing Page + App) ---
+# --- CUSTOM CSS (PREMIUM UI) ---
 st.markdown("""
 <style>
-    /* ========== IMPORTS ========== */
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+    /* ========== GLOBAL THEME ========== */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
     
-    /* ========== GLOBAL STYLES ========== */
-    .stApp { 
-        background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%);
-        color: #E0E0E0;
+    html, body, [class*="css"] {
         font-family: 'Poppins', sans-serif;
     }
     
-    /* ========== ANIMATED BACKGROUND ========== */
-    .stApp::before {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: 
-            radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(255, 119, 48, 0.1) 0%, transparent 50%),
-            radial-gradient(circle at 40% 40%, rgba(255, 215, 0, 0.08) 0%, transparent 40%);
-        pointer-events: none;
-        z-index: 0;
+    .stApp {
+        background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+        color: #e0e0e0;
     }
     
-    /* ========== LOGIN PAGE - BRAND TITLE ========== */
-    .brand-title {
-        font-family: 'Poppins', sans-serif;
-        font-size: 3.2rem;
-        font-weight: 800;
-        background: linear-gradient(135deg, #FFD700 0%, #FFA500 25%, #FF6B35 50%, #E65C00 75%, #FFD700 100%);
-        background-size: 200% 200%;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        text-align: center;
-        margin-bottom: 8px;
-        text-shadow: 0 0 40px rgba(255, 165, 0, 0.3);
-        animation: shimmer 3s ease-in-out infinite;
-        letter-spacing: 1px;
-    }
-    
-    @keyframes shimmer {
-        0%, 100% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-    }
-    
-    .brand-subtitle {
-        font-family: 'Poppins', sans-serif;
-        font-size: 1.1rem;
-        background: linear-gradient(90deg, #a855f7 0%, #6366f1 50%, #8b5cf6 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        text-align: center;
-        margin-bottom: 35px;
-        font-weight: 500;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-    }
-    
-    /* ========== LOGIN FORM CONTAINER ========== */
-    .stForm {
-        background: linear-gradient(145deg, rgba(30, 30, 50, 0.9) 0%, rgba(20, 20, 40, 0.95) 100%);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border-radius: 24px;
-        border: 1px solid rgba(255, 215, 0, 0.2);
-        box-shadow: 
-            0 25px 50px -12px rgba(0, 0, 0, 0.6),
-            0 0 40px rgba(255, 165, 0, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        padding: 30px !important;
-    }
-    
-    /* Login Form Header */
-    .stForm h3 {
+    /* ========== HEADERS ========== */
+    h1, h2, h3 {
         color: #FFD700 !important;
-        font-family: 'Poppins', sans-serif;
         font-weight: 600;
-        font-size: 1.4rem;
-        text-align: center;
-        margin-bottom: 20px;
-    }
-    
-    /* ========== PASSWORD INPUT FIELD ========== */
-    .stTextInput > div > div > input {
-        background: linear-gradient(145deg, rgba(15, 15, 25, 0.9) 0%, rgba(25, 25, 45, 0.9) 100%);
-        color: #ffffff;
-        border: 2px solid rgba(255, 215, 0, 0.3);
-        border-radius: 12px;
-        padding: 14px 18px;
-        font-family: 'Poppins', sans-serif;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-    }
-    
-    .stTextInput > div > div > input:focus {
-        border-color: #FFD700;
-        box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 165, 0, 0.15);
-        outline: none;
-    }
-    
-    .stTextInput > div > div > input::placeholder {
-        color: rgba(255, 255, 255, 0.4);
-    }
-    
-    /* ========== LOGIN BUTTON ========== */
-    .stFormSubmitButton > button {
-        background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF6B35 100%);
-        color: #0a0a0f !important;
-        font-family: 'Poppins', sans-serif;
-        font-weight: 700;
-        font-size: 1.1rem;
-        padding: 14px 40px;
-        border-radius: 50px;
-        border: none;
-        cursor: pointer;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        box-shadow: 0 10px 30px rgba(255, 165, 0, 0.4);
-        width: 100%;
-        margin-top: 15px;
-    }
-    
-    .stFormSubmitButton > button:hover {
-        transform: translateY(-3px) scale(1.02);
-        box-shadow: 0 15px 40px rgba(255, 165, 0, 0.5), 0 0 30px rgba(255, 215, 0, 0.3);
-    }
-    
-    .stFormSubmitButton > button:active {
-        transform: translateY(0) scale(0.98);
-    }
-    
-    /* ========== MAIN APP HEADERS ========== */
-    h1 { 
-        background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF6B35 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        font-family: 'Poppins', sans-serif;
-        font-weight: 700;
-    }
-    h2, h3 { 
-        color: #FFD700 !important;
-        font-family: 'Poppins', sans-serif;
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
     }
     
     /* ========== SIDEBAR ========== */
-    section[data-testid="stSidebar"] { 
-        background: linear-gradient(180deg, rgba(20, 20, 35, 0.98) 0%, rgba(15, 15, 30, 0.98) 100%);
-        border-right: 1px solid rgba(255, 215, 0, 0.15);
-        backdrop-filter: blur(10px);
-    }
-    
-    section[data-testid="stSidebar"] .stTitle {
-        color: #FFD700 !important;
+    section[data-testid="stSidebar"] {
+        background: rgba(20, 20, 35, 0.95);
+        border-right: 1px solid rgba(255, 215, 0, 0.1);
+        box-shadow: 5px 0 15px rgba(0,0,0,0.3);
     }
     
     /* ========== CHAT BUBBLES ========== */
-    .stChatMessage { 
-        border-radius: 16px; 
-        padding: 16px; 
-        margin-bottom: 12px; 
-        border: 1px solid rgba(255, 215, 0, 0.15);
-        backdrop-filter: blur(5px);
+    .stChatMessage {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 10px;
+        margin-bottom: 10px;
+        transition: transform 0.2s;
     }
-    div[data-testid="stChatMessage"]:nth-child(odd) { 
-        background: linear-gradient(135deg, rgba(30, 30, 50, 0.8) 0%, rgba(25, 25, 45, 0.8) 100%);
+    
+    .stChatMessage:hover {
+        transform: scale(1.01);
+        background: rgba(255, 255, 255, 0.08);
     }
-    div[data-testid="stChatMessage"]:nth-child(even) { 
-        background: linear-gradient(135deg, rgba(15, 15, 30, 0.9) 0%, rgba(20, 20, 40, 0.9) 100%);
+    
+    /* ========== LOGIN PAGE ========== */
+    .brand-title {
+        font-size: 3.5rem;
+        font-weight: 700;
+        background: linear-gradient(90deg, #FFD700, #FFA500, #FFD700);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-align: center;
+        margin-bottom: 0.5rem;
+        animation: shine 3s infinite linear;
+    }
+    
+    .brand-subtitle {
+        font-size: 1.2rem;
+        color: #a0a0ff;
+        text-align: center;
+        margin-bottom: 2rem;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+    }
+    
+    @keyframes shine {
+        0% { background-position: 0% 50%; }
+        100% { background-position: 200% 50%; }
+    }
+    
+    [data-testid="stForm"] {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 215, 0, 0.2);
+        border-radius: 20px;
+        padding: 3rem;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+    
+    .stTextInput > div > div > input {
+        background: rgba(0, 0, 0, 0.3);
+        color: #FFD700;
+        border: 1px solid rgba(255, 215, 0, 0.3);
+        border-radius: 10px;
+        padding: 10px;
     }
     
     /* ========== FOOTER ========== */
-    .footer { 
-        position: fixed; 
-        left: 0; 
-        bottom: 0; 
-        width: 100%; 
-        background: linear-gradient(90deg, rgba(10, 10, 20, 0.98) 0%, rgba(20, 20, 40, 0.98) 50%, rgba(10, 10, 20, 0.98) 100%);
+    .footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background: rgba(15, 12, 41, 0.95);
         color: rgba(255, 215, 0, 0.8); 
         text-align: center; 
         padding: 12px; 
@@ -288,7 +196,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- ðŸ” AUTHENTICATION LOGIC (LANDING PAGE) ---
+# --- 🔐 AUTHENTICATION LOGIC (LANDING PAGE) ---
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
@@ -302,22 +210,22 @@ if not st.session_state.authenticated:
         
         # Login Form
         with st.form("login_form"):
-            st.markdown("### ðŸ”’ Restricted Access")
+            st.markdown("### 🔒 Restricted Access")
             password = st.text_input("Enter Access Key", type="password", placeholder="Enter Password")
-            submit_btn = st.form_submit_button("ðŸš€ Unlock Portfolio", type="primary")
+            submit_btn = st.form_submit_button("🚀 Unlock Portfolio", type="primary")
             
             if submit_btn:
                 if password == APP_PASSWORD:
                     st.session_state.authenticated = True
                     st.rerun()
                 else:
-                    st.error("ðŸš« Access Denied! Invalid Key.")
+                    st.error("🚫 Access Denied! Invalid Key.")
     
-    st.markdown("""<div class="footer">Secure Gateway | Powered by Llama 3.3 & LangChain ðŸ¦œðŸ”—</div>""", unsafe_allow_html=True)
+    st.markdown("""<div class="footer">Secure Gateway | Powered by Llama 3.3 & LangChain 🦜🔗</div>""", unsafe_allow_html=True)
     st.stop() # Stop execution here until logged in
 
 # ------------------------------------------------------------------
-# ðŸŒŸ MAIN APP START (Sirf Login ke baad dikhega)
+# 🌟 MAIN APP START (Sirf Login ke baad dikhega)
 # ------------------------------------------------------------------
 
 # 3. Load Engines
@@ -341,11 +249,11 @@ def is_abusive(text):
 
 # --- SIDEBAR ---
 with st.sidebar:
-    st.title("ðŸ¦ Ambuj Kumar Tripathi")
+    st.title("🦁 Ambuj Kumar Tripathi")
     st.caption("GenAI Engineer | Prompt Specialist")
     st.divider()
     
-    st.markdown("### ðŸ“‚ Document Control")
+    st.markdown("### 📂 Document Control")
     uploaded_files = st.file_uploader("Upload PDF Docs", type="pdf", accept_multiple_files=True)
     
     if uploaded_files:
@@ -353,9 +261,9 @@ with st.sidebar:
         for uploaded_file in uploaded_files:
             with open(os.path.join("data", uploaded_file.name), "wb") as f:
                 f.write(uploaded_file.getbuffer())
-        st.success(f"âœ… {len(uploaded_files)} Files Uploaded!")
+        st.success(f"✅ {len(uploaded_files)} Files Uploaded!")
 
-    if st.button("ðŸš€ Process & Index Data", type="primary"):
+    if st.button("🚀 Process & Index Data", type="primary"):
         with st.spinner("Ambuj's System is Indexing..."):
             try:
                 loader = DirectoryLoader("./data", glob="*.pdf", loader_cls=PyMuPDFLoader)
@@ -366,14 +274,14 @@ with st.sidebar:
                 chunks = text_splitter.split_documents(documents)
                 embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
                 
-                if os.path.exists(os.path.join(os.getcwd(), 'chroma_db')): st.toast("âš ï¸ Updating Database...", icon="â„¹ï¸")
+                if os.path.exists(os.path.join(os.getcwd(), 'chroma_db')): st.toast("⚠️ Updating Database...", icon="ℹ️")
                 vector_db = Chroma.from_documents(documents=chunks, embedding=embeddings, persist_directory=os.path.join(os.getcwd(), 'chroma_db'))
-                st.success(f"âœ… Indexed {len(chunks)} chunks!")
+                st.success(f"✅ Indexed {len(chunks)} chunks!")
             except Exception as e: st.error(f"Error: {e}")
 
     st.divider()
 
-    with st.expander("ðŸ› ï¸ System Architecture (Specs)"):
+    with st.expander("🛠️ System Architecture (Specs)"):
         tech_data = {
             "Component": ["Chunking", "Embedding", "Vector DB", "LLM Model", "Analytics"],
             "Technology": ["LangChain", "HF MiniLM-L6", "ChromaDB", "Llama-3.3 70B", "Redis (Upstash)"]
@@ -393,24 +301,24 @@ with st.sidebar:
             st.session_state["analytics_counted"] = True
         
         count = redis_client.get("portfolio_visits")
-        st.metric("ðŸŒ Total Visitors", count)
+        st.metric("🌏 Total Visitors", count)
     except Exception as e:
         st.caption("Analytics Offline")
 
 # --- MAIN CHAT ---
-st.title("ðŸ¤– Ambuj Kumar Tripathi's AI Assistant")
+st.title("🤖 Ambuj Kumar Tripathi's AI Assistant")
 st.markdown("##### Ask me about **Ambuj's Experience** or the **Consumer Protection Act**.")
 
 if "messages" not in st.session_state: st.session_state["messages"] = []
 
-bot_icon = "./icon-512x512_imresizer (1).png" if os.path.exists("./icon-512x512_imresizer (1).png") else "ðŸ¦"
-user_icon = "ðŸ§‘â€ðŸ’»"
+bot_icon = "./icon-512x512_imresizer (1).png" if os.path.exists("./icon-512x512_imresizer (1).png") else "🦁"
+user_icon = "🧑‍💻"
 
 for msg in st.session_state.messages:
     st.chat_message(msg["role"], avatar=user_icon if msg["role"] == "user" else bot_icon).markdown(msg["content"])
 
 if user_input := st.chat_input("Ask a question..."):
-    if is_abusive(user_input): st.error("ðŸš« Professional queries only."); st.stop()
+    if is_abusive(user_input): st.error("🚫 Professional queries only."); st.stop()
     safe_input, is_pii_found = mask_pii(user_input)
     
     st.session_state.messages.append({"role": "user", "content": user_input})
