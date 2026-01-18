@@ -15,7 +15,7 @@ from upstash_redis import Redis
 import pandas as pd
 import warnings
 import time
-from langfuse.callback import CallbackHandler
+from langfuse.langchain import CallbackHandler
 
 # --- CONFIGURATION ---
 warnings.filterwarnings("ignore")
