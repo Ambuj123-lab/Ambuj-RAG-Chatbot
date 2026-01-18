@@ -14,6 +14,8 @@ from presidio_anonymizer import AnonymizerEngine
 from upstash_redis import Redis
 import pandas as pd
 import warnings
+import time
+from langfuse.callback import CallbackHandler
 
 # --- CONFIGURATION ---
 warnings.filterwarnings("ignore")
@@ -30,6 +32,11 @@ st.set_page_config(
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 APP_PASSWORD = os.getenv("APP_PASSWORD")  # Must be set in .env file
 API_KEY = OPENROUTER_API_KEY
+
+# --- LANGFUSE CONFIG ---
+LANGFUSE_SECRET_KEY = os.getenv("LANGFUSE_SECRET_KEY")
+LANGFUSE_PUBLIC_KEY = os.getenv("LANGFUSE_PUBLIC_KEY")
+LANGFUSE_HOST = os.getenv("LANGFUSE_HOST", "https://us.cloud.langfuse.com") # Default to US if not set
 
 # --- CUSTOM CSS (PREMIUM UI) ---
 st.markdown("""
@@ -384,8 +391,20 @@ if user_input := st.chat_input("Ask a question..."):
                         vector_db = Chroma.from_documents(documents=chunks, embedding=embeddings, persist_directory=os.path.join(os.getcwd(), 'chroma_db'))
                         st.rerun()
 
-                retriever = vector_db.as_retriever(search_kwargs={"k": 3})
-                relevant_docs = retriever.invoke(safe_input)
+                # --- A. CONFIDENCE SCORE CALCULATION ---
+                # Hum DB se puchte hain: "Sabse milta-julta document dikhao aur batao kitna door hai?"
+                results = vector_db.similarity_search_with_score(safe_input, k=3)
+                
+                relevant_docs = [doc for doc, score in results]
+                
+                if results:
+                    best_doc, score_distance = results[0]
+                    # Formula: Jitna kam distance, utna zyada confidence
+                    # ChromaDB L2 distance: 0 is exact match. 1+ is far.
+                    # Simple heuristic: (1 - distance) * 100. If distance > 1, confidence is 0.
+                    confidence_value = max(0, (1 - score_distance) * 100) 
+                else:
+                    confidence_value = 0
                 
                 context = "\n\n".join([d.page_content for d in relevant_docs])
                 if not context: st.markdown("⚠️ No relevant info found."); st.stop()
@@ -413,12 +432,52 @@ Context: {context}
 Question: {question}"""
                 
                 llm = ChatOpenAI(base_url="https://openrouter.ai/api/v1", api_key=API_KEY, model="meta-llama/llama-3.3-70b-instruct:free", temperature=0.3, streaming=True)
+                
+                # Initialize Langfuse Handler
+                langfuse_handler = CallbackHandler(
+                    secret_key=LANGFUSE_SECRET_KEY,
+                    public_key=LANGFUSE_PUBLIC_KEY,
+                    host=LANGFUSE_HOST
+                )
+                
                 chain = ChatPromptTemplate.from_template(system_prompt) | llm | StrOutputParser()
-                response = st.write_stream(chain.stream({"context": context, "question": safe_input}))
+                
+                # --- B. MAIN RAG GENERATION (LangFuse ke saath) ---
+                start_time = time.time()
+                
+                # Pass callback to the chain execution
+                response = st.write_stream(chain.stream({"context": context, "question": safe_input}, config={"callbacks": [langfuse_handler]}))
                 st.session_state.messages.append({"role": "assistant", "content": response})
                 
-                st.markdown("---")
-                st.caption(f"📚 **Sources:** {', '.join(list(set([doc.metadata.get('source', '').split('/')[-1] for doc in relevant_docs])))}")
+                end_time = time.time()
+                latency = end_time - start_time
+                
+                # --- UI METRICS ---
+                st.divider()
+                col1, col2, col3 = st.columns(3)
+                
+                with col1:
+                    st.metric(label="⏱️ Latency", value=f"{latency:.2f}s")
+                
+                with col2:
+                    if confidence_value > 75:
+                        st.metric(label="🎯 Confidence", value=f"{confidence_value:.1f}%", delta="High Trust")
+                    elif confidence_value > 40:
+                        st.metric(label="🎯 Confidence", value=f"{confidence_value:.1f}%", delta="Medium", delta_color="off")
+                    else:
+                        st.metric(label="🎯 Confidence", value=f"{confidence_value:.1f}%", delta="Low Trust", delta_color="inverse")
+
+                with col3:
+                     st.metric(label="💾 Tracking", value="LangFuse Active", delta="Live")
+                
+                # --- BACKEND LOGS ---
+                with st.expander("🔍 View Trace & Source Documents"):
+                    st.write(f"**Processing Time:** {latency:.4f} seconds")
+                    st.write(f"**Confidence Score:** {confidence_value:.2f}%")
+                    st.write("📚 **Retrieved Context:**")
+                    for i, doc in enumerate(relevant_docs):
+                        st.info(f"Source {i+1}: {doc.page_content[:300]}...")
+                        st.caption(f"Source File: {doc.metadata.get('source', 'Unknown')}")
             except Exception as e: st.error(f"Error: {e}")
 
 st.markdown("""<div class="footer">Developed by <b>Ambuj Kumar Tripathi</b> | Powered by Meta Llama 3.3 & LangChain 🦜🔗</div>""", unsafe_allow_html=True)
