@@ -399,10 +399,10 @@ if user_input := st.chat_input("Ask a question..."):
                 
                 if results:
                     best_doc, score_distance = results[0]
-                    # Formula: Jitna kam distance, utna zyada confidence
-                    # ChromaDB L2 distance: 0 is exact match. 1+ is far.
-                    # Simple heuristic: (1 - distance) * 100. If distance > 1, confidence is 0.
-                    confidence_value = max(0, (1 - score_distance) * 100) 
+                    # ChromaDB uses L2 distance: lower is better
+                    # Typical range: 0.5 (excellent) to 1.5 (poor)
+                    # Invert and normalize to 0-100% confidence
+                    confidence_value = max(0, min(100, (2.0 - score_distance) / 2.0 * 100))
                 else:
                     confidence_value = 0
                 
