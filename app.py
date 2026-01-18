@@ -433,12 +433,8 @@ Question: {question}"""
                 
                 llm = ChatOpenAI(base_url="https://openrouter.ai/api/v1", api_key=API_KEY, model="meta-llama/llama-3.3-70b-instruct:free", temperature=0.3, streaming=True)
                 
-                # Initialize Langfuse Handler
-                langfuse_handler = CallbackHandler(
-                    secret_key=LANGFUSE_SECRET_KEY,
-                    public_key=LANGFUSE_PUBLIC_KEY,
-                    host=LANGFUSE_HOST
-                )
+                # Initialize Langfuse Handler (reads from environment variables)
+                langfuse_handler = CallbackHandler()
                 
                 chain = ChatPromptTemplate.from_template(system_prompt) | llm | StrOutputParser()
                 
