@@ -260,7 +260,14 @@ if st.session_state.password_correct and not st.session_state.authenticated:
     with col2:
         st.markdown("<div style='height: 15vh;'></div>", unsafe_allow_html=True)
         st.markdown("## 📧 Sync Your Session")
-        st.info("Enter your email to enable **Chat History Persistence** (Powered by MongoDB).")
+        
+        # Custom Info Box (High Visibility)
+        st.markdown("""
+        <div style="background: rgba(255, 215, 0, 0.1); border-left: 4px solid #FFD700; padding: 15px; border-radius: 8px; color: #e0e0e0; margin-bottom: 20px;">
+            Enter your email to enable <b style="color: #FFD700;">Chat History Persistence</b> (Powered by MongoDB).
+            <br><span style="font-size: 0.8em; color: #a0a0a0;">(Your data is secure and used for demo purposes only)</span>
+        </div>
+        """, unsafe_allow_html=True)
         
         with st.form("email_form"):
             email = st.text_input("Email Address", placeholder="recruiter@company.com")
@@ -370,11 +377,35 @@ with st.sidebar:
 
     with st.expander("🛠️ System Architecture (Specs)"):
         tech_data = {
-            "Component": ["Chunking", "Embedding", "Vector DB", "LLM Model", "Analytics"],
-            "Technology": ["LangChain", "HF MiniLM-L6", "ChromaDB", "Llama-3.3 70B", "Redis (Upstash)"]
+            "Component": ["Chunking", "Embedding", "Vector DB", "LLM Model", "Memory (History)", "Analytics"],
+            "Technology": ["LangChain", "HF MiniLM-L6", "ChromaDB", "Llama-3.3 70B", "MongoDB Atlas", "Redis (Upstash)"]
         }
         df = pd.DataFrame(tech_data)
         st.dataframe(df, hide_index=True, use_container_width=True)
+
+    # --- CLEAR HISTORY / NEW SESSION BUTTON ---
+    if st.session_state.authenticated and st.session_state.user_email:
+        st.divider()
+        if st.button("✨ Start New Session", type="secondary", help="Clear current chat history and start fresh."):
+            if mongo_collection is not None:
+                try:
+                    mongo_collection.update_one(
+                        {"user_email": st.session_state.user_email},
+                        {"$set": {"messages": []}}
+                    )
+                except Exception: pass
+            st.session_state.messages = []
+            st.rerun()
+
+    # --- LOGOUT BUTTON ---
+    st.divider()
+    if st.session_state.authenticated:
+        if st.button("🔒 Logout", type="primary", help="Securely log out and return to the access screen."):
+            st.session_state.authenticated = False
+            st.session_state.password_correct = False
+            st.session_state.user_email = None
+            st.session_state.messages = []
+            st.rerun()
 
     # --- VISITOR COUNTER (REDIS) ---
     st.divider()
@@ -512,6 +543,12 @@ RESPONSE LOGIC (THE "BRAIN"):
      - **Observability:** Langfuse (Tracing, Prompt Management).
      - **Security:** PII Masking (Presidio), Abusive Content Filtering.
    - If asked about these, confirm he has hands-on experience.
+
+FORMATTING RULES (STRICT):
+- **ALWAYS** use ### Bold Headers for main sections.
+- **ALWAYS** use bullet points for lists.
+- **Highlight** key terms in **Bold**.
+- Do NOT use plain text blocks. Structure your answer visually.
 
 Context: {context}
 Question: {question}"""
