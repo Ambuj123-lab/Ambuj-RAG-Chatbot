@@ -386,16 +386,34 @@ with st.sidebar:
     # --- CLEAR HISTORY / NEW SESSION BUTTON ---
     if st.session_state.authenticated and st.session_state.user_email:
         st.divider()
-        if st.button("✨ Start New Session", type="secondary", help="Clear current chat history and start fresh."):
-            if mongo_collection is not None:
-                try:
-                    mongo_collection.update_one(
-                        {"user_email": st.session_state.user_email},
-                        {"$set": {"messages": []}}
-                    )
-                except Exception: pass
-            st.session_state.messages = []
-            st.rerun()
+        
+        # Confirmation Logic
+        if "confirm_reset" not in st.session_state:
+            st.session_state.confirm_reset = False
+            
+        if not st.session_state.confirm_reset:
+            if st.button("✨ Start New Session", type="secondary", help="Clear current chat history and start fresh."):
+                st.session_state.confirm_reset = True
+                st.rerun()
+        else:
+            st.warning("⚠️ **PERMANENT ACTION WARNING**\n\nStarting a new session will **permanently delete** your entire chat history from the database for this email.\n\nThis action cannot be undone. Are you sure?", icon="🔥")
+            col_confirm, col_cancel = st.columns(2)
+            with col_confirm:
+                if st.button("✅ Yes, Delete", type="primary"):
+                    if mongo_collection is not None:
+                        try:
+                            mongo_collection.update_one(
+                                {"user_email": st.session_state.user_email},
+                                {"$set": {"messages": []}}
+                            )
+                        except Exception: pass
+                    st.session_state.messages = []
+                    st.session_state.confirm_reset = False
+                    st.rerun()
+            with col_cancel:
+                if st.button("❌ Cancel", type="secondary"):
+                    st.session_state.confirm_reset = False
+                    st.rerun()
 
     # --- LOGOUT BUTTON ---
     st.divider()
