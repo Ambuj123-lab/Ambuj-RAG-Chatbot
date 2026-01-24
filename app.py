@@ -226,7 +226,7 @@ if not st.session_state.password_correct:
                 else:
                     st.error("🚫 Access Denied! Invalid Key.")
     
-    st.markdown("""<div class="footer">Secure Gateway | Powered by Llama 3.3 & LangChain 🦜🔗</div>""", unsafe_allow_html=True)
+    st.markdown("""<div class="footer">© 2026 Secure Gateway | Powered by Llama 3.3, LangChain & MongoDB</div>""", unsafe_allow_html=True)
     st.stop()
 
 # 3. EMAIL ENTRY SCREEN (For Persistence)
@@ -281,7 +281,7 @@ if st.session_state.password_correct and not st.session_state.authenticated:
                 
                 st.rerun()
 
-    st.markdown("""<div class="footer">Secure Gateway | Powered by Llama 3.3 & LangChain 🦜🔗</div>""", unsafe_allow_html=True)
+    st.markdown("""<div class="footer">© 2026 Secure Gateway | Powered by Llama 3.3, LangChain & MongoDB</div>""", unsafe_allow_html=True)
     st.stop()
 
 # ------------------------------------------------------------------
