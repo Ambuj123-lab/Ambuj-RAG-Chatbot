@@ -351,6 +351,17 @@ with st.sidebar:
 
     st.divider()
 
+    # --- USER ANALYTICS DASHBOARD ---
+    if st.session_state.authenticated and st.session_state.user_email and mongo_collection is not None:
+        try:
+            user_data = mongo_collection.find_one({"user_email": st.session_state.user_email})
+            if user_data:
+                total_msgs = len(user_data.get("messages", []))
+                st.metric("📊 Your Activity", f"{total_msgs} messages")
+        except: pass
+
+    st.divider()
+
     with st.expander("🛠️ System Architecture (Specs)"):
         tech_data = {
             "Component": ["Chunking", "Embedding", "Vector DB", "LLM Model", "Memory (History)", "Analytics"],
@@ -420,6 +431,9 @@ with st.sidebar:
 # --- MAIN CHAT ---
 st.title("🤖 Ambuj Kumar Tripathi's AI Assistant")
 st.markdown("##### Ask me about **Ambuj's Experience** or the **Consumer Protection Act**.")
+
+# Observability Notice
+st.info("🔍 **This chatbot is under active observability** - All interactions are monitored via LangFuse for quality assurance and performance optimization.", icon="ℹ️")
 
 if "messages" not in st.session_state: st.session_state["messages"] = []
 
@@ -602,6 +616,33 @@ Question: {question}"""
                 with col3:
                     st.metric(label="💾 Tracking", value="Active", delta="LangFuse")
                 
+                # --- USER FEEDBACK BUTTONS ---
+                st.divider()
+                st.markdown("**Was this response helpful?**")
+                col_thumbs1, col_thumbs2, col_thumbs3 = st.columns([1, 1, 8])
+                with col_thumbs1:
+                    if st.button("👍 Helpful", key=f"thumbs_up_{len(st.session_state.messages)}"):
+                        if mongo_collection is not None and st.session_state.user_email:
+                            try:
+                                mongo_collection.update_one(
+                                    {"user_email": st.session_state.user_email},
+                                    {"$push": {"feedback": {"question": user_input, "response": response[:100], "rating": "👍", "timestamp": datetime.now()}}},
+                                    upsert=True
+                                )
+                                st.toast("Thanks for your feedback!", icon="✅")
+                            except: pass
+                with col_thumbs2:
+                    if st.button("👎 Not Helpful", key=f"thumbs_down_{len(st.session_state.messages)}"):
+                        if mongo_collection is not None and st.session_state.user_email:
+                            try:
+                                mongo_collection.update_one(
+                                    {"user_email": st.session_state.user_email},
+                                    {"$push": {"feedback": {"question": user_input, "response": response[:100], "rating": "👎", "timestamp": datetime.now()}}},
+                                    upsert=True
+                                )
+                                st.toast("Feedback received. We'll improve!", icon="📝")
+                            except: pass
+                
                 # --- BACKEND LOGS ---
                 with st.expander("🔍 View Trace & Source Documents"):
                     st.write(f"**Processing Time:** {latency:.4f} seconds")
@@ -612,4 +653,4 @@ Question: {question}"""
                         st.caption(f"Source File: {doc.metadata.get('source', 'Unknown')}")
             except Exception as e: st.error(f"Error: {e}")
 
-st.markdown("""<div class="footer">Developed by <b>Ambuj Kumar Tripathi</b> | Powered by Meta Llama 3.3 & LangChain 🦜🔗</div>""", unsafe_allow_html=True)
+st.markdown("""<div class="footer">© 2025 <b>Ambuj Kumar Tripathi</b> | Powered by Meta Llama 3.3, LangChain, MongoDB & LangFuse</div>""", unsafe_allow_html=True)
