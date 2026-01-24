@@ -370,8 +370,35 @@ with st.sidebar:
         try:
             user_data = mongo_collection.find_one({"user_email": st.session_state.user_email})
             if user_data:
-                total_msgs = len(user_data.get("messages", []))
-                st.metric("📊 Your Activity", f"{total_msgs} messages")
+                messages = user_data.get("messages", [])
+                total_msgs = len(messages)
+                
+                # Topic Analysis (Simple keyword matching)
+                ambuj_count = sum(1 for msg in messages if msg.get("role") == "user" and any(word in msg.get("content", "").lower() for word in ["ambuj", "skill", "experience", "email", "contact"]))
+                consumer_count = sum(1 for msg in messages if msg.get("role") == "user" and any(word in ["consumer", "complaint", "act", "section"] for word in msg.get("content", "").lower().split()))
+                
+                most_topic = "Ambuj's Profile" if ambuj_count >= consumer_count else "Consumer Act"
+                
+                # Session Duration
+                if messages:
+                    first_msg = messages[0].get("timestamp")
+                    last_msg = messages[-1].get("timestamp")
+                    if first_msg and last_msg:
+                        duration = (last_msg - first_msg).total_seconds() / 60  # minutes
+                        duration_str = f"{int(duration)} min" if duration < 60 else f"{duration/60:.1f} hrs"
+                    else:
+                        duration_str = "N/A"
+                else:
+                    duration_str = "0 min"
+                
+                # Display Metrics
+                col_stat1, col_stat2 = st.columns(2)
+                with col_stat1:
+                    st.metric("📊 Total Questions", f"{total_msgs // 2}")
+                with col_stat2:
+                    st.metric("⏱️ Session Time", duration_str)
+                
+                st.caption(f"🎯 Most Asked: **{most_topic}**")
         except: pass
 
     st.divider()
@@ -633,9 +660,13 @@ Question: {question}"""
                 # --- USER FEEDBACK BUTTONS ---
                 st.divider()
                 st.markdown("**Was this response helpful?**")
+                
+                # Use unique keys and handle feedback without breaking UI
+                feedback_key = f"feedback_{len(st.session_state.messages)}"
+                
                 col_thumbs1, col_thumbs2, col_thumbs3 = st.columns([1, 1, 8])
                 with col_thumbs1:
-                    if st.button("👍 Helpful", key=f"thumbs_up_{len(st.session_state.messages)}"):
+                    if st.button("👍 Helpful", key=f"up_{feedback_key}"):
                         if mongo_collection is not None and st.session_state.user_email:
                             try:
                                 mongo_collection.update_one(
@@ -643,10 +674,10 @@ Question: {question}"""
                                     {"$push": {"feedback": {"question": user_input, "response": response[:100], "rating": "👍", "timestamp": datetime.now()}}},
                                     upsert=True
                                 )
-                                st.toast("Thanks for your feedback!", icon="✅")
                             except: pass
+                        st.success("✅ Thanks for your feedback!")  # Inline message instead of toast
                 with col_thumbs2:
-                    if st.button("👎 Not Helpful", key=f"thumbs_down_{len(st.session_state.messages)}"):
+                    if st.button("👎 Not Helpful", key=f"down_{feedback_key}"):
                         if mongo_collection is not None and st.session_state.user_email:
                             try:
                                 mongo_collection.update_one(
@@ -654,8 +685,8 @@ Question: {question}"""
                                     {"$push": {"feedback": {"question": user_input, "response": response[:100], "rating": "👎", "timestamp": datetime.now()}}},
                                     upsert=True
                                 )
-                                st.toast("Feedback received. We'll improve!", icon="📝")
                             except: pass
+                        st.info("📝 Feedback received. We'll improve!")
                 
                 # --- BACKEND LOGS ---
                 with st.expander("🔍 View Trace & Source Documents"):
