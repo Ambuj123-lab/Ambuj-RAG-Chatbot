@@ -234,14 +234,28 @@ if st.session_state.password_correct and not st.session_state.authenticated:
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         st.markdown("<div style='height: 15vh;'></div>", unsafe_allow_html=True)
-        st.markdown("## 📧 Sync Your Session")
         
-        # Custom Info Box (High Visibility)
-        # Custom Info Box (High Visibility)
+        # Premium Header
         st.markdown("""
-        <div style="background: rgba(56, 189, 248, 0.1); border-left: 4px solid #38bdf8; padding: 15px; border-radius: 8px; color: #f1f5f9; margin-bottom: 20px;">
-            Enter your email to enable <b style="color: #38bdf8;">Chat History Persistence</b> (Powered by MongoDB).
-            <br><span style="font-size: 0.8em; color: #94a3b8;">(Your data is secure and used for demo purposes only)</span>
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <div style="font-size: 2.5rem; font-weight: 800; background: linear-gradient(90deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem;">
+                🔐 Session Persistence
+            </div>
+            <div style="font-size: 1rem; color: #94a3b8; letter-spacing: 1px;">
+                ENTERPRISE CHAT HISTORY | POWERED BY MONGODB ATLAS
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Info Box
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(129, 140, 248, 0.1) 100%); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.1);">
+            <div style="color: #38bdf8; font-weight: 600; margin-bottom: 8px;">✨ Why Provide Email?</div>
+            <div style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.6;">
+                • <b>Resume Conversations:</b> Your chat history is securely stored in MongoDB Atlas<br>
+                • <b>Multi-Session Support:</b> Access your conversation from any device<br>
+                • <b>Privacy Guaranteed:</b> Data is encrypted and used solely for demo purposes
+            </div>
         </div>
         """, unsafe_allow_html=True)
         
@@ -433,7 +447,7 @@ st.title("🤖 Ambuj Kumar Tripathi's AI Assistant")
 st.markdown("##### Ask me about **Ambuj's Experience** or the **Consumer Protection Act**.")
 
 # Observability Notice
-st.info("🔍 **This chatbot is under active observability** - All interactions are monitored via LangFuse for quality assurance and performance optimization.", icon="ℹ️")
+st.warning("🔍 **Enterprise-Grade Observability Active** | All interactions are monitored via LangFuse for quality assurance and continuous improvement.", icon="⚠️")
 
 if "messages" not in st.session_state: st.session_state["messages"] = []
 
@@ -653,4 +667,4 @@ Question: {question}"""
                         st.caption(f"Source File: {doc.metadata.get('source', 'Unknown')}")
             except Exception as e: st.error(f"Error: {e}")
 
-st.markdown("""<div class="footer">© 2025 <b>Ambuj Kumar Tripathi</b> | Powered by Meta Llama 3.3, LangChain, MongoDB & LangFuse</div>""", unsafe_allow_html=True)
+st.markdown("""<div class="footer">© 2026 <b>Ambuj Kumar Tripathi</b> | Powered by Meta Llama 3.3, LangChain, MongoDB & LangFuse</div>""", unsafe_allow_html=True)
