@@ -471,7 +471,7 @@ with st.sidebar:
 
 # --- MAIN CHAT ---
 st.title("🤖 Ambuj Kumar Tripathi's AI Assistant")
-st.markdown("##### Ask me about **Ambuj's Experience** or the **Consumer Protection Act**.")
+st.markdown("##### Ask me about **Ambuj's Experience**, **Consumer Protection Act**, or **General AI/Tech Queries**. I'm here to help!")
 
 # Observability Notice
 st.warning("🔍 **Enterprise-Grade Observability Active** | All interactions are monitored via LangFuse for quality assurance and continuous improvement.", icon="⚠️")
@@ -688,14 +688,27 @@ Question: {question}"""
                             except: pass
                         st.info("📝 Feedback received. We'll improve!")
                 
-                # --- BACKEND LOGS ---
-                with st.expander("🔍 View Trace & Source Documents"):
-                    st.write(f"**Processing Time:** {latency:.4f} seconds")
-                    st.write(f"**Confidence Score:** {confidence_value:.2f}%")
-                    st.write("📚 **Retrieved Context:**")
-                    for i, doc in enumerate(relevant_docs):
-                        st.info(f"Source {i+1}: {doc.page_content[:300]}...")
-                        st.caption(f"Source File: {doc.metadata.get('source', 'Unknown')}")
+                # --- BACKEND LOGS (OUTSIDE CHAT BLOCK TO PREVENT HIDING) ---
+                
             except Exception as e: st.error(f"Error: {e}")
+            
+            # --- PREMIUM SOURCE CITATIONS (Always visible, outside try block) ---
+            if 'relevant_docs' in locals() and relevant_docs:
+                st.divider()
+                st.markdown("📚 **Sources Used**")
+                for i, doc in enumerate(relevant_docs):
+                    source_file = doc.metadata.get('source', 'Unknown').split('/')[-1].replace('.pdf', '')
+                    content_preview = doc.page_content[:200].replace('\n', ' ')
+                    
+                    st.markdown(f"""
+                    <div style="background: rgba(56, 189, 248, 0.05); border-left: 3px solid #38bdf8; border-radius: 8px; padding: 12px; margin-bottom: 10px;">
+                        <div style="color: #38bdf8; font-weight: 600; font-size: 0.85rem; margin-bottom: 6px;">
+                            📄 Source {i+1}: {source_file}
+                        </div>
+                        <div style="color: #94a3b8; font-size: 0.8rem; line-height: 1.4;">
+                            {content_preview}...
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
 st.markdown("""<div class="footer">© 2026 <b>Ambuj Kumar Tripathi</b> | Powered by Meta Llama 3.3, LangChain, MongoDB & LangFuse</div>""", unsafe_allow_html=True)
