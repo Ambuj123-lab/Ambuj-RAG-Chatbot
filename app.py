@@ -44,87 +44,80 @@ LANGFUSE_HOST = os.getenv("LANGFUSE_HOST", "https://us.cloud.langfuse.com") # De
 st.markdown("""
 <style>
     /* ========== GLOBAL THEME ========== */
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
     
     html, body, [class*="css"] {
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Inter', sans-serif;
     }
     
     .stApp {
-        background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
-        color: #e0e0e0;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); /* Slate Dark */
+        color: #f1f5f9;
     }
     
     /* ========== HEADERS ========== */
     h1, h2, h3 {
-        color: #FFD700 !important;
-        font-weight: 600;
-        text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        color: #38bdf8 !important; /* Sky Blue */
+        font-weight: 700;
+        letter-spacing: -0.5px;
     }
     
     /* ========== SIDEBAR ========== */
     section[data-testid="stSidebar"] {
-        background: rgba(20, 20, 35, 0.95);
-        border-right: 1px solid rgba(255, 215, 0, 0.1);
+        background: rgba(15, 23, 42, 0.98);
+        border-right: 1px solid rgba(56, 189, 248, 0.1);
         box-shadow: 5px 0 15px rgba(0,0,0,0.3);
     }
     
     /* ========== CHAT BUBBLES ========== */
     .stChatMessage {
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 15px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 10px;
+        background: rgba(30, 41, 59, 0.5);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 15px;
         margin-bottom: 10px;
-        transition: transform 0.2s;
     }
     
     .stChatMessage:hover {
-        transform: scale(1.01);
-        background: rgba(255, 255, 255, 0.08);
+        background: rgba(30, 41, 59, 0.8);
+        border-color: rgba(56, 189, 248, 0.2);
     }
     
     /* ========== LOGIN PAGE ========== */
     .brand-title {
-        font-size: 3.5rem;
-        font-weight: 700;
-        background: linear-gradient(90deg, #FFD700, #FFA500, #FFD700);
+        font-size: 3rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, #38bdf8, #818cf8); /* Blue to Indigo */
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         text-align: center;
         margin-bottom: 0.5rem;
-        animation: shine 3s infinite linear;
     }
     
     .brand-subtitle {
-        font-size: 1.2rem;
-        color: #a0a0ff;
+        font-size: 1.1rem;
+        color: #94a3b8;
         text-align: center;
         margin-bottom: 2rem;
-        letter-spacing: 1.5px;
+        letter-spacing: 1px;
         text-transform: uppercase;
-    }
-    
-    @keyframes shine {
-        0% { background-position: 0% 50%; }
-        100% { background-position: 200% 50%; }
+        font-weight: 500;
     }
     
     [data-testid="stForm"] {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 215, 0, 0.2);
-        border-radius: 20px;
+        background: rgba(30, 41, 59, 0.4);
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        border-radius: 16px;
         padding: 3rem;
         backdrop-filter: blur(10px);
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
     }
     
     .stTextInput > div > div > input {
-        background: rgba(0, 0, 0, 0.3);
-        color: #FFD700;
-        border: 1px solid rgba(255, 215, 0, 0.3);
-        border-radius: 10px;
-        padding: 10px;
+        background: rgba(15, 23, 42, 0.6);
+        color: #38bdf8;
+        border: 1px solid rgba(56, 189, 248, 0.3);
+        border-radius: 8px;
     }
     
     /* ========== FOOTER ========== */
@@ -133,74 +126,56 @@ st.markdown("""
         left: 0;
         bottom: 0;
         width: 100%;
-        background: rgba(15, 12, 41, 0.95);
-        color: rgba(255, 215, 0, 0.8); 
+        background: rgba(15, 23, 42, 0.95);
+        color: #94a3b8; 
         text-align: center; 
         padding: 12px; 
-        border-top: 1px solid rgba(255, 215, 0, 0.2);
-        font-size: 14px; 
+        border-top: 1px solid rgba(56, 189, 248, 0.1);
+        font-size: 13px; 
         z-index: 100;
-        font-family: 'Poppins', sans-serif;
-        font-weight: 400;
     }
     
     .footer b {
-        background: linear-gradient(90deg, #FFD700, #FFA500);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-    
-    /* ========== ERROR/SUCCESS MESSAGES ========== */
-    .stAlert {
-        border-radius: 12px;
-        font-family: 'Poppins', sans-serif;
+        color: #38bdf8;
     }
     
     /* ========== METRIC STYLING ========== */
     [data-testid="stMetric"] {
-        background: linear-gradient(145deg, rgba(30, 30, 50, 0.8) 0%, rgba(20, 20, 40, 0.8) 100%);
-        border-radius: 16px;
+        background: rgba(30, 41, 59, 0.5);
+        border-radius: 12px;
         padding: 15px;
-        border: 1px solid rgba(255, 215, 0, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.05);
     }
     
     [data-testid="stMetric"] label {
-        color: rgba(255, 215, 0, 0.8) !important;
+        color: #94a3b8 !important;
     }
     
     [data-testid="stMetric"] [data-testid="stMetricValue"] {
-        color: #FFD700 !important;
+        color: #38bdf8 !important;
     }
     
     /* ========== BUTTONS ========== */
     .stButton > button {
-        background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-        color: #0a0a0f !important;
-        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%); /* Sky to Blue */
+        color: white !important;
+        font-family: 'Inter', sans-serif;
         font-weight: 600;
-        border-radius: 12px;
+        border-radius: 8px;
         border: none;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
     }
     
     .stButton > button:hover {
-        box-shadow: 0 8px 25px rgba(255, 165, 0, 0.4);
-        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);
+        transform: translateY(-1px);
     }
     
     /* ========== EXPANDER ========== */
     .streamlit-expanderHeader {
-        background: linear-gradient(145deg, rgba(30, 30, 50, 0.7) 0%, rgba(25, 25, 45, 0.7) 100%);
-        border-radius: 12px;
-        color: #FFD700 !important;
-        font-family: 'Poppins', sans-serif;
-    }
-    
-    /* ========== DATAFRAME ========== */
-    .stDataFrame {
-        border-radius: 12px;
-        overflow: hidden;
+        background: rgba(30, 41, 59, 0.5);
+        border-radius: 8px;
+        color: #38bdf8 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -262,10 +237,11 @@ if st.session_state.password_correct and not st.session_state.authenticated:
         st.markdown("## 📧 Sync Your Session")
         
         # Custom Info Box (High Visibility)
+        # Custom Info Box (High Visibility)
         st.markdown("""
-        <div style="background: rgba(255, 215, 0, 0.1); border-left: 4px solid #FFD700; padding: 15px; border-radius: 8px; color: #e0e0e0; margin-bottom: 20px;">
-            Enter your email to enable <b style="color: #FFD700;">Chat History Persistence</b> (Powered by MongoDB).
-            <br><span style="font-size: 0.8em; color: #a0a0a0;">(Your data is secure and used for demo purposes only)</span>
+        <div style="background: rgba(56, 189, 248, 0.1); border-left: 4px solid #38bdf8; padding: 15px; border-radius: 8px; color: #f1f5f9; margin-bottom: 20px;">
+            Enter your email to enable <b style="color: #38bdf8;">Chat History Persistence</b> (Powered by MongoDB).
+            <br><span style="font-size: 0.8em; color: #94a3b8;">(Your data is secure and used for demo purposes only)</span>
         </div>
         """, unsafe_allow_html=True)
         
@@ -555,12 +531,12 @@ RESPONSE LOGIC (THE "BRAIN"):
 4. **HYBRID KNOWLEDGE HANDLING:**
    - The `Context` may contain mixed info (Permanent Resume + User Uploaded Docs). Treat all provided `Context` as valid information for the session.
 
-5. **RECENT SKILLS UPDATE (IMPORTANT):**
-   - Ambuj has recently acquired the following skills (even if not in Resume PDF):
-     - **Database:** MongoDB (NoSQL), Vector Databases (ChromaDB).
-     - **Observability:** Langfuse (Tracing, Prompt Management).
-     - **Security:** PII Masking (Presidio), Abusive Content Filtering.
-   - If asked about these, confirm he has hands-on experience.
+5. **CORE SKILLS EXTENSION (AI MONITORING & SECURITY):**
+   - **CRITICAL:** Ambuj has implemented advanced features in this very bot which demonstrate his skills in:
+     - **Database & Persistence:** MongoDB (NoSQL) for chat history and ChromaDB for RAG.
+     - **LLM Observability:** Langfuse for tracing and prompt management.
+     - **AI Security:** Presidio for PII Masking and Custom Guardrails for Content Filtering.
+   - **INSTRUCTION:** When asked about Ambuj's skills, **ALWAYS** include these technologies to showcase his full-stack GenAI capabilities, even if they are missing from the static PDF resume.
 
 FORMATTING RULES (STRICT):
 - **ALWAYS** use ### Bold Headers for main sections.
