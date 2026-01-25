@@ -83,95 +83,94 @@ st.markdown("""
         border-color: rgba(56, 189, 248, 0.2);
     }
     
-    /* ========== LOGIN PAGE ========== */
-    .brand-title {
-        font-size: 3rem;
-        font-weight: 800;
-        background: linear-gradient(90deg, #38bdf8, #818cf8); /* Blue to Indigo */
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        text-align: center;
-        margin-bottom: 0.5rem;
+    /* Animated Gradient Background */
+    @keyframes gradient {
+        0% {background-position: 0% 50%;}
+        50% {background-position: 100% 50%;}
+        100% {background-position: 0% 50%;}
     }
     
-    .brand-subtitle {
-        font-size: 1.1rem;
-        color: #94a3b8;
-        text-align: center;
-        margin-bottom: 2rem;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        font-weight: 500;
+    .stApp {
+        background: linear-gradient(-45deg, #0f172a, #1e293b, #0f172a, #172554);
+        background-size: 400% 400%;
+        animation: gradient 15s ease infinite;
+        color: #e2e8f0;
     }
     
-    [data-testid="stForm"] {
-        background: rgba(30, 41, 59, 0.4);
-        border: 1px solid rgba(56, 189, 248, 0.2);
-        border-radius: 16px;
-        padding: 3rem;
+    /* Glassmorphism Card */
+    .glass-card {
+        background: rgba(30, 41, 59, 0.7);
         backdrop-filter: blur(10px);
-        box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 40px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        text-align: center;
+        margin-bottom: 20px;
     }
     
+    /* Premium Input Fields */
     .stTextInput > div > div > input {
-        background: rgba(15, 23, 42, 0.6);
-        color: #38bdf8;
-        border: 1px solid rgba(56, 189, 248, 0.3);
-        border-radius: 8px;
+        background-color: rgba(15, 23, 42, 0.6) !important;
+        color: #f8fafc !important;
+        border: 1px solid rgba(148, 163, 184, 0.2) !important;
+        border-radius: 8px !important;
+        padding: 10px 15px !important;
     }
     
-    /* ========== FOOTER ========== */
-    .footer {
-        position: fixed;
-        left: 0;
-        bottom: 0;
-        width: 100%;
-        background: rgba(15, 23, 42, 0.95);
-        color: #94a3b8; 
-        text-align: center; 
-        padding: 12px; 
-        border-top: 1px solid rgba(56, 189, 248, 0.1);
-        font-size: 13px; 
-        z-index: 100;
+    .stTextInput > div > div > input:focus {
+        border-color: #38bdf8 !important;
+        box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2) !important;
     }
     
-    .footer b {
-        color: #38bdf8;
+    /* Sidebar */
+    [data-testid="stSidebar"] {
+        background-color: rgba(30, 41, 59, 0.95) !important;
+        border-right: 1px solid #334155;
     }
     
-    /* ========== METRIC STYLING ========== */
-    [data-testid="stMetric"] {
-        background: rgba(30, 41, 59, 0.5);
-        border-radius: 12px;
-        padding: 15px;
-        border: 1px solid rgba(255, 255, 255, 0.05);
+    /* Headers */
+    h1, h2, h3 {
+        color: #f8fafc !important;
+        font-family: 'Inter', sans-serif;
     }
     
-    [data-testid="stMetric"] label {
-        color: #94a3b8 !important;
-    }
-    
-    [data-testid="stMetric"] [data-testid="stMetricValue"] {
+    /* Metrics */
+    [data-testid="stMetricValue"] {
         color: #38bdf8 !important;
     }
     
-    /* ========== BUTTONS ========== */
+    /* Buttons */
     .stButton > button {
-        background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%); /* Sky to Blue */
+        background: linear-gradient(90deg, #38bdf8, #818cf8) !important;
         color: white !important;
-        font-family: 'Inter', sans-serif;
-        font-weight: 600;
-        border-radius: 8px;
-        border: none;
-        transition: all 0.2s ease;
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        transition: transform 0.2s !important;
     }
-    
     .stButton > button:hover {
-        box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);
-        transform: translateY(-1px);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
     }
     
-    /* ========== EXPANDER ========== */
+    /* Footer */
+    .footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: rgba(30, 41, 59, 0.9);
+        color: #94a3b8;
+        text-align: center;
+        padding: 10px;
+        font-size: 12px;
+        border-top: 1px solid #334155;
+        z-index: 100;
+    }
+    
+    /* Expander */
     .streamlit-expanderHeader {
         background: rgba(30, 41, 59, 0.5);
         border-radius: 8px;
