@@ -83,50 +83,15 @@ st.markdown("""
         border-color: rgba(56, 189, 248, 0.2);
     }
     
-    /* Animated Gradient Background */
-    @keyframes gradient {
-        0% {background-position: 0% 50%;}
-        50% {background-position: 100% 50%;}
-        100% {background-position: 0% 50%;}
-    }
-    
+    /* Main Background */
     .stApp {
-        background: linear-gradient(-45deg, #0f172a, #1e293b, #0f172a, #172554);
-        background-size: 400% 400%;
-        animation: gradient 15s ease infinite;
+        background-color: #0f172a;
         color: #e2e8f0;
-    }
-    
-    /* Glassmorphism Card */
-    .glass-card {
-        background: rgba(30, 41, 59, 0.7);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 16px;
-        padding: 40px;
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
-        text-align: center;
-        margin-bottom: 20px;
-    }
-    
-    /* Premium Input Fields */
-    .stTextInput > div > div > input {
-        background-color: rgba(15, 23, 42, 0.6) !important;
-        color: #f8fafc !important;
-        border: 1px solid rgba(148, 163, 184, 0.2) !important;
-        border-radius: 8px !important;
-        padding: 10px 15px !important;
-    }
-    
-    .stTextInput > div > div > input:focus {
-        border-color: #38bdf8 !important;
-        box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2) !important;
     }
     
     /* Sidebar */
     [data-testid="stSidebar"] {
-        background-color: rgba(30, 41, 59, 0.95) !important;
+        background-color: #1e293b;
         border-right: 1px solid #334155;
     }
     
@@ -141,18 +106,24 @@ st.markdown("""
         color: #38bdf8 !important;
     }
     
+    /* Chat Bubbles */
+    .stChatMessage {
+        background-color: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 12px;
+    }
+    
     /* Buttons */
     .stButton > button {
-        background: linear-gradient(90deg, #38bdf8, #818cf8) !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 8px !important;
-        font-weight: 600 !important;
-        transition: transform 0.2s !important;
+        background-color: #38bdf8;
+        color: #0f172a;
+        border-radius: 8px;
+        font-weight: 600;
+        border: none;
     }
     .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+        background-color: #0ea5e9;
+        color: white;
     }
     
     /* Footer */
@@ -161,7 +132,7 @@ st.markdown("""
         bottom: 0;
         left: 0;
         width: 100%;
-        background: rgba(30, 41, 59, 0.9);
+        background-color: #1e293b;
         color: #94a3b8;
         text-align: center;
         padding: 10px;
@@ -170,11 +141,19 @@ st.markdown("""
         z-index: 100;
     }
     
-    /* Expander */
-    .streamlit-expanderHeader {
-        background: rgba(30, 41, 59, 0.5);
-        border-radius: 8px;
-        color: #38bdf8 !important;
+    /* Custom Title Style */
+    .brand-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, #38bdf8, #818cf8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+    .brand-subtitle {
+        color: #94a3b8;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -204,25 +183,17 @@ def init_mongodb():
 mongo_collection = init_mongodb()
 
 # 2. PASSWORD SCREEN
-# 2. PASSWORD SCREEN
 if not st.session_state.password_correct:
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         st.markdown("<div style='height: 10vh;'></div>", unsafe_allow_html=True)
+        st.markdown('<div class="brand-title">Ambuj Kumar Tripathi</div>', unsafe_allow_html=True)
+        st.markdown('<div class="brand-subtitle">GenAI Engineer | Prompt Specialist | Solution Architect</div>', unsafe_allow_html=True)
         
-        # Glass Card Start
-        st.markdown('<div class="glass-card">', unsafe_allow_html=True)
-        
-        # Lock Icon & Title
-        st.markdown('<div style="font-size: 3rem; margin-bottom: 10px;">🔒</div>', unsafe_allow_html=True)
-        st.markdown('<h2 style="margin: 0; color: white;">Restricted Access</h2>', unsafe_allow_html=True)
-        st.markdown('<p style="color: #94a3b8; margin-bottom: 20px;">Enter Access Key to Continue</p>', unsafe_allow_html=True)
-        
-        # Login Form
         with st.form("login_form"):
-            password = st.text_input("Enter Access Key", type="password", placeholder="Enter Password", label_visibility="collapsed")
-            st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-            submit_btn = st.form_submit_button("Verify Key")
+            st.markdown("### 🔒 Restricted Access")
+            password = st.text_input("Enter Access Key", type="password", placeholder="Enter Password")
+            submit_btn = st.form_submit_button("🚀 Verify Key", type="primary")
             
             if submit_btn:
                 if password == APP_PASSWORD:
@@ -230,24 +201,16 @@ if not st.session_state.password_correct:
                     st.rerun()
                 else:
                     st.error("🚫 Access Denied! Invalid Key.")
-        
-        # Glass Card End
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        st.markdown("""<div style="text-align: center; margin-top: 20px; color: #64748b; font-size: 0.8rem;">© 2026 Secure Gateway | Powered by Llama 3.3, LangChain & MongoDB</div>""", unsafe_allow_html=True)
     
+    st.markdown("""<div class="footer">© 2026 Secure Gateway | Powered by Llama 3.3, LangChain & MongoDB</div>""", unsafe_allow_html=True)
     st.stop()
 
 # 3. EMAIL ENTRY SCREEN (For Persistence)
-if st.session_state.password_correct and not st.session_state.authenticated:
+if not st.session_state.authenticated:
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         st.markdown("<div style='height: 15vh;'></div>", unsafe_allow_html=True)
         
-        # Glass Card Start
-        st.markdown('<div class="glass-card">', unsafe_allow_html=True)
-        
-        # Premium Header
         st.markdown("""
         <div style="text-align: center; margin-bottom: 2rem;">
             <div style="font-size: 2.5rem; font-weight: 800; background: linear-gradient(90deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem;">
@@ -259,7 +222,6 @@ if st.session_state.password_correct and not st.session_state.authenticated:
         </div>
         """, unsafe_allow_html=True)
         
-        # Info Box
         st.markdown("""
         <div style="background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(129, 140, 248, 0.1) 100%); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.1);">
             <div style="color: #38bdf8; font-weight: 600; margin-bottom: 8px;">✨ Why Provide Email?</div>
@@ -272,33 +234,29 @@ if st.session_state.password_correct and not st.session_state.authenticated:
         """, unsafe_allow_html=True)
         
         with st.form("email_form"):
-            email = st.text_input("Email Address", placeholder="recruiter@company.com", label_visibility="collapsed")
-            st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-            start_btn = st.form_submit_button("✨ Start Experience")
+            email = st.text_input("Enter Email Address", placeholder="example@company.com")
+            submit_email = st.form_submit_button("🚀 Start Session", type="primary")
             
-            if start_btn and email:
-                st.session_state.user_email = email
-                st.session_state.authenticated = True
-                
-                # LOAD HISTORY FROM MONGODB
-                if mongo_collection is not None:
-                    try:
-                        user_data = mongo_collection.find_one({"user_email": email})
-                        if user_data and "messages" in user_data:
-                            st.session_state.messages = user_data["messages"]
-                            st.toast("Welcome back! Chat history loaded.", icon="🔄")
-                        else:
-                            st.toast("New session started.", icon="✨")
-                    except Exception as e:
-                        st.error(f"DB Error: {e}")
+            if submit_email:
+                if email:
+                    if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+                        st.error("Please enter a valid email address.")
+                    else:
+                        st.session_state.user_email = email
+                        st.session_state.authenticated = True
+                        
+                        if mongo_collection is not None:
+                            try:
+                                user_data = mongo_collection.find_one({"user_email": email})
+                                if user_data and "messages" in user_data:
+                                    st.session_state.messages = user_data["messages"]
+                                    st.toast(f"Welcome back! Loaded {len(st.session_state.messages)} messages.", icon="🔄")
+                            except Exception as e:
+                                st.error(f"DB Error: {e}")
                 
                 st.rerun()
-        
-        # Glass Card End
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        st.markdown("""<div style="text-align: center; margin-top: 20px; color: #64748b; font-size: 0.8rem;">© 2026 Secure Gateway | Powered by Llama 3.3, LangChain & MongoDB</div>""", unsafe_allow_html=True)
-    
+
+    st.markdown("""<div class="footer">© 2026 Secure Gateway | Powered by Llama 3.3, LangChain & MongoDB</div>""", unsafe_allow_html=True)
     st.stop()
 
 # ------------------------------------------------------------------
