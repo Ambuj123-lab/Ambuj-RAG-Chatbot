@@ -683,18 +683,18 @@ Question: {question}"""
             # --- PREMIUM SOURCE CITATIONS (Always visible, outside try block) ---
             if 'relevant_docs' in locals() and relevant_docs:
                 st.divider()
-                st.markdown("📚 **Sources Used**")
+                st.markdown("📚 **Sources Used (Citation)**")
                 for i, doc in enumerate(relevant_docs):
                     source_file = doc.metadata.get('source', 'Unknown').split('/')[-1].replace('.pdf', '')
                     content_preview = doc.page_content[:200].replace('\n', ' ')
                     
                     st.markdown(f"""
-                    <div style="background: rgba(56, 189, 248, 0.05); border-left: 3px solid #38bdf8; border-radius: 8px; padding: 12px; margin-bottom: 10px;">
-                        <div style="color: #38bdf8; font-weight: 600; font-size: 0.85rem; margin-bottom: 6px;">
+                    <div style="background: rgba(251, 191, 36, 0.08); border-left: 3px solid #fbbf24; border-radius: 8px; padding: 12px; margin-bottom: 10px;">
+                        <div style="color: #fbbf24; font-weight: 600; font-size: 0.85rem; margin-bottom: 6px;">
                             📄 Source {i+1}: {source_file}
                         </div>
-                        <div style="color: #94a3b8; font-size: 0.8rem; line-height: 1.4;">
-                            {content_preview}...
+                        <div style="color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                            <mark style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; padding: 2px 4px; border-radius: 3px;">{content_preview[:100]}</mark>{content_preview[100:]}...
                         </div>
                     </div>
                     """, unsafe_allow_html=True)
