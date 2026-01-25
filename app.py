@@ -40,7 +40,7 @@ LANGFUSE_SECRET_KEY = os.getenv("LANGFUSE_SECRET_KEY")
 LANGFUSE_PUBLIC_KEY = os.getenv("LANGFUSE_PUBLIC_KEY")
 LANGFUSE_HOST = os.getenv("LANGFUSE_HOST", "https://us.cloud.langfuse.com") # Default to US if not set
 
-# --- CUSTOM CSS (PREMIUM UI) ---
+# --- CUSTOM CSS (PREMIUM GOLD THEME) ---
 st.markdown("""
 <style>
     /* ========== GLOBAL THEME ========== */
@@ -51,82 +51,53 @@ st.markdown("""
     }
     
     .stApp {
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); /* Slate Dark */
-        color: #f1f5f9;
+        background-color: #0f172a;
+        color: #e2e8f0;
     }
     
     /* ========== HEADERS ========== */
     h1, h2, h3 {
-        color: #38bdf8 !important; /* Sky Blue */
+        color: #fbbf24 !important; /* Amber Gold */
         font-weight: 700;
         letter-spacing: -0.5px;
     }
     
     /* ========== SIDEBAR ========== */
-    section[data-testid="stSidebar"] {
-        background: rgba(15, 23, 42, 0.98);
-        border-right: 1px solid rgba(56, 189, 248, 0.1);
-        box-shadow: 5px 0 15px rgba(0,0,0,0.3);
+    [data-testid="stSidebar"] {
+        background-color: #1e293b;
+        border-right: 1px solid rgba(251, 191, 36, 0.2);
     }
     
     /* ========== CHAT BUBBLES ========== */
-    .stChatMessage {
-        background: rgba(30, 41, 59, 0.5);
-        border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        padding: 15px;
-        margin-bottom: 10px;
-    }
-    
-    .stChatMessage:hover {
-        background: rgba(30, 41, 59, 0.8);
-        border-color: rgba(56, 189, 248, 0.2);
-    }
-    
-    /* Main Background */
-    .stApp {
-        background-color: #0f172a;
-        color: #e2e8f0;
-    }
-    
-    /* Sidebar */
-    [data-testid="stSidebar"] {
-        background-color: #1e293b;
-        border-right: 1px solid #334155;
-    }
-    
-    /* Headers */
-    h1, h2, h3 {
-        color: #f8fafc !important;
-        font-family: 'Inter', sans-serif;
-    }
-    
-    /* Metrics */
-    [data-testid="stMetricValue"] {
-        color: #38bdf8 !important;
-    }
-    
-    /* Chat Bubbles */
     .stChatMessage {
         background-color: #1e293b;
         border: 1px solid #334155;
         border-radius: 12px;
     }
     
-    /* Buttons */
+    .stChatMessage:hover {
+        border-color: rgba(251, 191, 36, 0.3);
+    }
+    
+    /* ========== METRICS ========== */
+    [data-testid="stMetricValue"] {
+        color: #fbbf24 !important;
+    }
+    
+    /* ========== BUTTONS ========== */
     .stButton > button {
-        background-color: #38bdf8;
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
         color: #0f172a;
         border-radius: 8px;
         font-weight: 600;
         border: none;
     }
     .stButton > button:hover {
-        background-color: #0ea5e9;
-        color: white;
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        color: #0f172a;
     }
     
-    /* Footer */
+    /* ========== FOOTER ========== */
     .footer {
         position: fixed;
         bottom: 0;
@@ -137,15 +108,15 @@ st.markdown("""
         text-align: center;
         padding: 10px;
         font-size: 12px;
-        border-top: 1px solid #334155;
+        border-top: 1px solid rgba(251, 191, 36, 0.2);
         z-index: 100;
     }
     
-    /* Custom Title Style */
+    /* ========== BRAND TITLE (GOLD GRADIENT) ========== */
     .brand-title {
         font-size: 2.5rem;
         font-weight: 800;
-        background: linear-gradient(90deg, #38bdf8, #818cf8);
+        background: linear-gradient(90deg, #fbbf24, #f59e0b);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin-bottom: 0.5rem;
@@ -154,6 +125,15 @@ st.markdown("""
         color: #94a3b8;
         font-size: 1.1rem;
         margin-bottom: 2rem;
+    }
+    
+    /* ========== MAIN TITLE (GOLD GRADIENT) ========== */
+    .main-title {
+        font-size: 2.2rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, #fbbf24, #f59e0b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -186,7 +166,11 @@ mongo_collection = init_mongodb()
 if not st.session_state.password_correct:
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        st.markdown("<div style='height: 10vh;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height: 5vh;'></div>", unsafe_allow_html=True)
+        
+        # Add Icon
+        st.image("icon-512x512_imresizer (1).png", width=100)
+        
         st.markdown('<div class="brand-title">Ambuj Kumar Tripathi</div>', unsafe_allow_html=True)
         st.markdown('<div class="brand-subtitle">GenAI Engineer | Prompt Specialist | Solution Architect</div>', unsafe_allow_html=True)
         
@@ -209,11 +193,11 @@ if not st.session_state.password_correct:
 if not st.session_state.authenticated:
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        st.markdown("<div style='height: 15vh;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height: 10vh;'></div>", unsafe_allow_html=True)
         
         st.markdown("""
         <div style="text-align: center; margin-bottom: 2rem;">
-            <div style="font-size: 2.5rem; font-weight: 800; background: linear-gradient(90deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem;">
+            <div style="font-size: 2.5rem; font-weight: 800; background: linear-gradient(90deg, #fbbf24, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem;">
                 🔐 Session Persistence
             </div>
             <div style="font-size: 1rem; color: #94a3b8; letter-spacing: 1px;">
@@ -223,8 +207,8 @@ if not st.session_state.authenticated:
         """, unsafe_allow_html=True)
         
         st.markdown("""
-        <div style="background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(129, 140, 248, 0.1) 100%); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.1);">
-            <div style="color: #38bdf8; font-weight: 600; margin-bottom: 8px;">✨ Why Provide Email?</div>
+        <div style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 30px;">
+            <div style="color: #fbbf24; font-weight: 600; margin-bottom: 8px;">✨ Why Provide Email?</div>
             <div style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.6;">
                 • <b>Resume Conversations:</b> Your chat history is securely stored in MongoDB Atlas<br>
                 • <b>Multi-Session Support:</b> Access your conversation from any device<br>
@@ -445,7 +429,7 @@ with st.sidebar:
         st.caption("Analytics Offline")
 
 # --- MAIN CHAT ---
-st.title("🤖 Ambuj Kumar Tripathi's AI Assistant")
+st.markdown('<div class="main-title">🤖 Ambuj Kumar Tripathi\'s AI Assistant</div>', unsafe_allow_html=True)
 st.markdown("##### Ask me about **Ambuj's Experience**, **Consumer Protection Act**, or **General AI/Tech Queries**. I'm here to help!")
 
 # Observability Notice
