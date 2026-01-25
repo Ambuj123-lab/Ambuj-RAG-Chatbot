@@ -162,6 +162,17 @@ def init_mongodb():
 
 mongo_collection = init_mongodb()
 
+# TTL Index for automatic 30-day cleanup (GDPR Compliance)
+def ensure_ttl_index():
+    if mongo_collection is not None:
+        try:
+            # Create TTL index on last_activity field (30 days = 2592000 seconds)
+            mongo_collection.create_index("last_activity", expireAfterSeconds=2592000)
+        except Exception:
+            pass  # Index might already exist
+
+ensure_ttl_index()
+
 # 2. PASSWORD SCREEN
 if not st.session_state.password_correct:
     col1, col2, col3 = st.columns([1, 2, 1])
@@ -597,12 +608,15 @@ Question: {question}"""
                 response = st.write_stream(chain.stream({"context": context, "question": safe_input, "history": history_text}, config={"callbacks": [langfuse_handler]}))
                 st.session_state.messages.append({"role": "assistant", "content": response})
 
-                # SAVE BOT MSG TO MONGODB
+                # SAVE BOT MSG TO MONGODB (with last_activity for TTL)
                 if mongo_collection is not None and st.session_state.user_email:
                     try:
                         mongo_collection.update_one(
                             {"user_email": st.session_state.user_email},
-                            {"$push": {"messages": {"role": "assistant", "content": response, "timestamp": datetime.now()}}},
+                            {
+                                "$push": {"messages": {"role": "assistant", "content": response, "timestamp": datetime.now()}},
+                                "$set": {"last_activity": datetime.now()}  # TTL resets on activity
+                            },
                             upsert=True
                         )
                     except Exception: pass
