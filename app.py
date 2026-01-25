@@ -721,4 +721,47 @@ Question: {question}"""
                     </div>
                     """, unsafe_allow_html=True)
 
+# --- FEEDBACK BUTTONS (OUTSIDE CHAT BLOCK - Always accessible) ---
+if "last_interaction" in st.session_state:
+    st.divider()
+    st.markdown("**Was this response helpful?**")
+    
+    feedback_key = f"feedback_{len(st.session_state.get('messages', []))}"
+    
+    col_fb1, col_fb2, col_fb3 = st.columns([1, 1, 8])
+    with col_fb1:
+        if st.button("👍 Helpful", key=f"global_up_{feedback_key}"):
+            if mongo_collection is not None and st.session_state.get("user_email"):
+                try:
+                    mongo_collection.update_one(
+                        {"user_email": st.session_state.user_email},
+                        {"$push": {"feedback": {
+                            "question": st.session_state.last_interaction["question"], 
+                            "response": st.session_state.last_interaction["response"][:100], 
+                            "rating": "👍", 
+                            "timestamp": datetime.now()
+                        }}},
+                        upsert=True
+                    )
+                    st.success("✅ Thanks for your feedback!")
+                except Exception as e:
+                    st.error(f"Feedback Error: {e}")
+    with col_fb2:
+        if st.button("👎 Not Helpful", key=f"global_down_{feedback_key}"):
+            if mongo_collection is not None and st.session_state.get("user_email"):
+                try:
+                    mongo_collection.update_one(
+                        {"user_email": st.session_state.user_email},
+                        {"$push": {"feedback": {
+                            "question": st.session_state.last_interaction["question"], 
+                            "response": st.session_state.last_interaction["response"][:100], 
+                            "rating": "👎", 
+                            "timestamp": datetime.now()
+                        }}},
+                        upsert=True
+                    )
+                    st.info("📝 Feedback received. We'll improve!")
+                except Exception as e:
+                    st.error(f"Feedback Error: {e}")
+
 st.markdown("""<div class="footer">© 2026 <b>Ambuj Kumar Tripathi</b> | Powered by Meta Llama 3.3, LangChain, MongoDB & LangFuse</div>""", unsafe_allow_html=True)
