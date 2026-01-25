@@ -694,7 +694,7 @@ Question: {question}"""
                             📄 Source {i+1}: {source_file}
                         </div>
                         <div style="color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
-                            <mark style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; padding: 2px 4px; border-radius: 3px;">{content_preview[:100]}</mark>{content_preview[100:]}...
+                            <mark style="background: #fbbf24; color: #0f172a; padding: 2px 4px; border-radius: 3px;">{content_preview[:100]}</mark>{content_preview[100:]}...
                         </div>
                     </div>
                     """, unsafe_allow_html=True)
