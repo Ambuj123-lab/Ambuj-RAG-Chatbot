@@ -679,6 +679,11 @@ Question: {question}"""
                     """, unsafe_allow_html=True)
 
 # --- FEEDBACK BUTTONS (OUTSIDE CHAT BLOCK - Always accessible) ---
+# Show pending feedback toast (after rerun)
+if st.session_state.get("feedback_pending"):
+    st.toast(st.session_state.feedback_pending["msg"], icon=st.session_state.feedback_pending["icon"])
+    del st.session_state.feedback_pending
+
 if "last_interaction" in st.session_state:
     st.divider()
     st.markdown("**Was this response helpful?**")
@@ -700,9 +705,9 @@ if "last_interaction" in st.session_state:
                         }}},
                         upsert=True
                     )
-                    st.toast("Feedback recorded successfully!", icon="✅")
-                    del st.session_state.last_interaction  # Clear to prevent repeat
-                    st.rerun()  # Immediately hide buttons
+                    st.session_state.feedback_pending = {"msg": "Feedback recorded successfully!", "icon": "✅"}
+                    del st.session_state.last_interaction
+                    st.rerun()
                 except Exception as e:
                     st.error(f"Feedback Error: {e}")
     with col_fb2:
@@ -719,9 +724,9 @@ if "last_interaction" in st.session_state:
                         }}},
                         upsert=True
                     )
-                    st.toast("Feedback noted. We'll improve!", icon="📝")
-                    del st.session_state.last_interaction  # Clear to prevent repeat
-                    st.rerun()  # Immediately hide buttons
+                    st.session_state.feedback_pending = {"msg": "Feedback noted. We'll improve!", "icon": "📝"}
+                    del st.session_state.last_interaction
+                    st.rerun()
                 except Exception as e:
                     st.error(f"Feedback Error: {e}")
 
