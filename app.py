@@ -253,7 +253,7 @@ if not st.session_state.authenticated:
                 st.rerun()
 
     st.markdown("""<div class="footer">© 2026 Secure Gateway | Powered by Llama 3.3, LangChain & MongoDB</div>""", unsafe_allow_html=True)
-    st.caption("🔒 GDPR Compliant | Chat history auto-deletes after 30 days of inactivity")
+    st.markdown('<p style="text-align: center; color: #fbbf24; font-size: 0.85rem; margin-top: 15px;">🛡️ <b>GDPR Compliant</b> | Chat history auto-deletes after 30 days via MongoDB TTL</p>', unsafe_allow_html=True)
     st.stop()
 
 # ------------------------------------------------------------------
