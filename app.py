@@ -445,6 +445,7 @@ st.markdown("##### Ask me about **Ambuj's Experience**, **Consumer Protection Ac
 
 # Observability Notice
 st.warning("🔍 **Enterprise-Grade Observability Active** | All interactions are monitored via LangFuse for quality assurance and continuous improvement.", icon="⚠️")
+st.info("🔒 **GDPR Compliance** | Chat history auto-deletes after **30 days of inactivity** via MongoDB TTL Index.", icon="ℹ️")
 
 if "messages" not in st.session_state: st.session_state["messages"] = []
 
