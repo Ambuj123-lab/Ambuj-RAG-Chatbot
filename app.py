@@ -702,6 +702,7 @@ if "last_interaction" in st.session_state:
                     )
                     st.toast("Feedback recorded successfully!", icon="✅")
                     del st.session_state.last_interaction  # Clear to prevent repeat
+                    st.rerun()  # Immediately hide buttons
                 except Exception as e:
                     st.error(f"Feedback Error: {e}")
     with col_fb2:
@@ -720,6 +721,7 @@ if "last_interaction" in st.session_state:
                     )
                     st.toast("Feedback noted. We'll improve!", icon="📝")
                     del st.session_state.last_interaction  # Clear to prevent repeat
+                    st.rerun()  # Immediately hide buttons
                 except Exception as e:
                     st.error(f"Feedback Error: {e}")
 
