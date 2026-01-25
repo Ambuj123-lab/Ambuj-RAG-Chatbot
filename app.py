@@ -655,49 +655,6 @@ Question: {question}"""
                 with col3:
                     st.metric(label="💾 Tracking", value="Active", delta="LangFuse")
                 
-                # --- USER FEEDBACK BUTTONS ---
-                st.divider()
-                st.markdown("**Was this response helpful?**")
-                
-                # Use unique keys and handle feedback without breaking UI
-                feedback_key = f"feedback_{len(st.session_state.messages)}"
-                
-                col_thumbs1, col_thumbs2, col_thumbs3 = st.columns([1, 1, 8])
-                with col_thumbs1:
-                    if st.button("👍 Helpful", key=f"up_{feedback_key}"):
-                        if mongo_collection is not None and st.session_state.user_email:
-                            try:
-                                mongo_collection.update_one(
-                                    {"user_email": st.session_state.user_email},
-                                    {"$push": {"feedback": {
-                                        "question": st.session_state.last_interaction["question"], 
-                                        "response": st.session_state.last_interaction["response"][:100], 
-                                        "rating": "👍", 
-                                        "timestamp": datetime.now()
-                                    }}},
-                                    upsert=True
-                                )
-                            except Exception as e:
-                                st.error(f"Feedback Error: {e}")
-                        st.success("✅ Thanks for your feedback!")  # Inline message instead of toast
-                with col_thumbs2:
-                    if st.button("👎 Not Helpful", key=f"down_{feedback_key}"):
-                        if mongo_collection is not None and st.session_state.user_email:
-                            try:
-                                mongo_collection.update_one(
-                                    {"user_email": st.session_state.user_email},
-                                    {"$push": {"feedback": {
-                                        "question": st.session_state.last_interaction["question"], 
-                                        "response": st.session_state.last_interaction["response"][:100], 
-                                        "rating": "👎", 
-                                        "timestamp": datetime.now()
-                                    }}},
-                                    upsert=True
-                                )
-                            except Exception as e:
-                                st.error(f"Feedback Error: {e}")
-                        st.info("📝 Feedback received. We'll improve!")
-                
                 # --- BACKEND LOGS (OUTSIDE CHAT BLOCK TO PREVENT HIDING) ---
                 
             except Exception as e: st.error(f"Error: {e}")
@@ -744,6 +701,7 @@ if "last_interaction" in st.session_state:
                         upsert=True
                     )
                     st.success("✅ Thanks for your feedback!")
+                    del st.session_state.last_interaction  # Clear to prevent repeat
                 except Exception as e:
                     st.error(f"Feedback Error: {e}")
     with col_fb2:
@@ -761,6 +719,7 @@ if "last_interaction" in st.session_state:
                         upsert=True
                     )
                     st.info("📝 Feedback received. We'll improve!")
+                    del st.session_state.last_interaction  # Clear to prevent repeat
                 except Exception as e:
                     st.error(f"Feedback Error: {e}")
 
