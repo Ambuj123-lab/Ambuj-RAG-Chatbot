@@ -198,6 +198,7 @@ if not st.session_state.password_correct:
                     st.error("🚫 Access Denied! Invalid Key.")
     
     st.markdown("""<div class="footer">© 2026 Secure Gateway | Powered by Llama 3.3, LangChain & MongoDB</div>""", unsafe_allow_html=True)
+    st.caption("🔒 GDPR Compliant | Chat history auto-deletes after 30 days of inactivity")
     st.stop()
 
 # 3. EMAIL ENTRY SCREEN (For Persistence)
@@ -252,6 +253,7 @@ if not st.session_state.authenticated:
                 st.rerun()
 
     st.markdown("""<div class="footer">© 2026 Secure Gateway | Powered by Llama 3.3, LangChain & MongoDB</div>""", unsafe_allow_html=True)
+    st.caption("🔒 GDPR Compliant | Chat history auto-deletes after 30 days of inactivity")
     st.stop()
 
 # ------------------------------------------------------------------
@@ -445,7 +447,7 @@ st.markdown("##### Ask me about **Ambuj's Experience**, **Consumer Protection Ac
 
 # Observability Notice
 st.warning("🔍 **Enterprise-Grade Observability Active** | All interactions are monitored via LangFuse for quality assurance and continuous improvement.", icon="⚠️")
-st.info("🔒 **GDPR Compliance** | Chat history auto-deletes after **30 days of inactivity** via MongoDB TTL Index.", icon="ℹ️")
+st.warning("🔒 **GDPR Compliance** | Chat history auto-deletes after **30 days of inactivity** via MongoDB TTL Index.", icon="🛡️")
 
 if "messages" not in st.session_state: st.session_state["messages"] = []
 
