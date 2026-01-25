@@ -1,4 +1,4 @@
-﻿import streamlit as st
+import streamlit as st
 import os
 import re
 from dotenv import load_dotenv
@@ -247,6 +247,9 @@ if not st.session_state.authenticated:
                                 if user_data and "messages" in user_data:
                                     st.session_state.messages = user_data["messages"]
                                     st.toast(f"Welcome back! Loaded {len(st.session_state.messages)} messages.", icon="🔄")
+                                else:
+                                    # New user or no history - CLEAR existing messages
+                                    st.session_state.messages = []
                             except Exception as e:
                                 st.error(f"DB Error: {e}")
                 
@@ -612,6 +615,12 @@ Question: {question}"""
                 response = st.write_stream(chain.stream({"context": context, "question": safe_input, "history": history_text}, config={"callbacks": [langfuse_handler]}))
                 st.session_state.messages.append({"role": "assistant", "content": response})
 
+                # SAVE TO SESSION STATE FOR FEEDBACK (Persist across reruns)
+                st.session_state.last_interaction = {
+                    "question": safe_input,
+                    "response": response
+                }
+
                 # SAVE BOT MSG TO MONGODB (with last_activity for TTL)
                 if mongo_collection is not None and st.session_state.user_email:
                     try:
@@ -660,10 +669,16 @@ Question: {question}"""
                             try:
                                 mongo_collection.update_one(
                                     {"user_email": st.session_state.user_email},
-                                    {"$push": {"feedback": {"question": user_input, "response": response[:100], "rating": "👍", "timestamp": datetime.now()}}},
+                                    {"$push": {"feedback": {
+                                        "question": st.session_state.last_interaction["question"], 
+                                        "response": st.session_state.last_interaction["response"][:100], 
+                                        "rating": "👍", 
+                                        "timestamp": datetime.now()
+                                    }}},
                                     upsert=True
                                 )
-                            except: pass
+                            except Exception as e:
+                                st.error(f"Feedback Error: {e}")
                         st.success("✅ Thanks for your feedback!")  # Inline message instead of toast
                 with col_thumbs2:
                     if st.button("👎 Not Helpful", key=f"down_{feedback_key}"):
@@ -671,10 +686,16 @@ Question: {question}"""
                             try:
                                 mongo_collection.update_one(
                                     {"user_email": st.session_state.user_email},
-                                    {"$push": {"feedback": {"question": user_input, "response": response[:100], "rating": "👎", "timestamp": datetime.now()}}},
+                                    {"$push": {"feedback": {
+                                        "question": st.session_state.last_interaction["question"], 
+                                        "response": st.session_state.last_interaction["response"][:100], 
+                                        "rating": "👎", 
+                                        "timestamp": datetime.now()
+                                    }}},
                                     upsert=True
                                 )
-                            except: pass
+                            except Exception as e:
+                                st.error(f"Feedback Error: {e}")
                         st.info("📝 Feedback received. We'll improve!")
                 
                 # --- BACKEND LOGS (OUTSIDE CHAT BLOCK TO PREVENT HIDING) ---
