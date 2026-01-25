@@ -205,19 +205,25 @@ def init_mongodb():
 mongo_collection = init_mongodb()
 
 # 2. PASSWORD SCREEN
+# 2. PASSWORD SCREEN
 if not st.session_state.password_correct:
-    # --- LANDING PAGE DESIGN ---
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        st.markdown("<div style='height: 10vh;'></div>", unsafe_allow_html=True) # Spacing
-        st.markdown('<div class="brand-title">Ambuj Kumar Tripathi</div>', unsafe_allow_html=True)
-        st.markdown('<div class="brand-subtitle">GenAI Engineer | Prompt Specialist | Solution Architect</div>', unsafe_allow_html=True)
+        st.markdown("<div style='height: 10vh;'></div>", unsafe_allow_html=True)
+        
+        # Glass Card Start
+        st.markdown('<div class="glass-card">', unsafe_allow_html=True)
+        
+        # Lock Icon & Title
+        st.markdown('<div style="font-size: 3rem; margin-bottom: 10px;">🔒</div>', unsafe_allow_html=True)
+        st.markdown('<h2 style="margin: 0; color: white;">Restricted Access</h2>', unsafe_allow_html=True)
+        st.markdown('<p style="color: #94a3b8; margin-bottom: 20px;">Enter Access Key to Continue</p>', unsafe_allow_html=True)
         
         # Login Form
         with st.form("login_form"):
-            st.markdown("### 🔒 Restricted Access")
-            password = st.text_input("Enter Access Key", type="password", placeholder="Enter Password")
-            submit_btn = st.form_submit_button("🚀 Verify Key", type="primary")
+            password = st.text_input("Enter Access Key", type="password", placeholder="Enter Password", label_visibility="collapsed")
+            st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+            submit_btn = st.form_submit_button("Verify Key")
             
             if submit_btn:
                 if password == APP_PASSWORD:
@@ -225,8 +231,12 @@ if not st.session_state.password_correct:
                     st.rerun()
                 else:
                     st.error("🚫 Access Denied! Invalid Key.")
+        
+        # Glass Card End
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown("""<div style="text-align: center; margin-top: 20px; color: #64748b; font-size: 0.8rem;">© 2026 Secure Gateway | Powered by Llama 3.3, LangChain & MongoDB</div>""", unsafe_allow_html=True)
     
-    st.markdown("""<div class="footer">© 2026 Secure Gateway | Powered by Llama 3.3, LangChain & MongoDB</div>""", unsafe_allow_html=True)
     st.stop()
 
 # 3. EMAIL ENTRY SCREEN (For Persistence)
