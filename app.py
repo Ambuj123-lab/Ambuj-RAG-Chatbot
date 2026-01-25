@@ -610,6 +610,7 @@ FORMATTING RULES (STRICT):
 - Do NOT use plain text blocks. Structure your answer visually.
 
 Context: {context}
+Chat History: {history}
 Question: {question}"""
                 
                 llm = ChatOpenAI(base_url="https://openrouter.ai/api/v1", api_key=API_KEY, model="meta-llama/llama-3.3-70b-instruct:free", temperature=0.3, streaming=True)
@@ -622,8 +623,19 @@ Question: {question}"""
                 # --- B. MAIN RAG GENERATION (LangFuse ke saath) ---
                 start_time = time.time()
                 
+                # SLIDING WINDOW MEMORY (Last 3 Messages)
+                chat_history = []
+                if "messages" in st.session_state:
+                    # Get last 3 messages (excluding current user input which is already in 'question')
+                    history_msgs = st.session_state.messages[-4:-1] if len(st.session_state.messages) > 1 else []
+                    for msg in history_msgs:
+                        role_prefix = "User: " if msg["role"] == "user" else "Assistant: "
+                        chat_history.append(role_prefix + str(msg["content"]))
+                
+                history_text = "\n".join(chat_history) if chat_history else "No previous history."
+                
                 # Pass callback to the chain execution
-                response = st.write_stream(chain.stream({"context": context, "question": safe_input}, config={"callbacks": [langfuse_handler]}))
+                response = st.write_stream(chain.stream({"context": context, "question": safe_input, "history": history_text}, config={"callbacks": [langfuse_handler]}))
                 st.session_state.messages.append({"role": "assistant", "content": response})
 
                 # SAVE BOT MSG TO MONGODB
