@@ -245,6 +245,9 @@ if st.session_state.password_correct and not st.session_state.authenticated:
     with col2:
         st.markdown("<div style='height: 15vh;'></div>", unsafe_allow_html=True)
         
+        # Glass Card Start
+        st.markdown('<div class="glass-card">', unsafe_allow_html=True)
+        
         # Premium Header
         st.markdown("""
         <div style="text-align: center; margin-bottom: 2rem;">
@@ -270,8 +273,9 @@ if st.session_state.password_correct and not st.session_state.authenticated:
         """, unsafe_allow_html=True)
         
         with st.form("email_form"):
-            email = st.text_input("Email Address", placeholder="recruiter@company.com")
-            start_btn = st.form_submit_button("✨ Start Experience", type="primary")
+            email = st.text_input("Email Address", placeholder="recruiter@company.com", label_visibility="collapsed")
+            st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+            start_btn = st.form_submit_button("✨ Start Experience")
             
             if start_btn and email:
                 st.session_state.user_email = email
@@ -290,8 +294,12 @@ if st.session_state.password_correct and not st.session_state.authenticated:
                         st.error(f"DB Error: {e}")
                 
                 st.rerun()
-
-    st.markdown("""<div class="footer">© 2026 Secure Gateway | Powered by Llama 3.3, LangChain & MongoDB</div>""", unsafe_allow_html=True)
+        
+        # Glass Card End
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown("""<div style="text-align: center; margin-top: 20px; color: #64748b; font-size: 0.8rem;">© 2026 Secure Gateway | Powered by Llama 3.3, LangChain & MongoDB</div>""", unsafe_allow_html=True)
+    
     st.stop()
 
 # ------------------------------------------------------------------
